@@ -18,4 +18,10 @@ Inside the project diretory run
 * Outputs to dist folder
 
 ## Using TableGraphExplorer
-The project will start with an initial load of data using a g.V().range(0,5).
+The project will start with an initial load of data using a g.V().range(0,5). Use the <, -, or > actions to traverse the graph. The actions in the header row perform the action on all displayed vertices for that table. The action in the data rows perform the action for the vertex in that row. Below is a description of the action buttons.
+
+### Actions
+* < Gets incoming edges and the source vertices
+* - Gets both incoming and outgoing edges and the other vertices
+* > Gets outgoing edges and the destination vertices
+* + Creates new table and initializes it with ID query of vertices
