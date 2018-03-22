@@ -1,7 +1,7 @@
 'use strict';
 angular.module('tableGraphExplorerApp').factory('ConfigService', ['$log', function ($log) {
     var config = {
-        endpoint: "http://localhost:8080/"
+        endpoint: "http://localhost:8182/"
     };  
     
     return {

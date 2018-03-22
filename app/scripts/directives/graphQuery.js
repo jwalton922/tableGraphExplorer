@@ -17,7 +17,7 @@ angular.module('tableGraphExplorerApp').controller('GraphQueryCtrl', ['$scope', 
         $log.log("GraphQueryCtrl Query from directive",$scope.inputQuery);
         $scope.vertices = [];
         $scope.showFilter = false;
-        $scope.filters = [{filterType: "label", label: "autobahn_message_type"}];
+        $scope.filters = [];
         if($scope.inputQuery.vertices){
             var query = "g.V()";
             $log.log("Adding id queries to query");
