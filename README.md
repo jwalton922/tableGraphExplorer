@@ -22,6 +22,6 @@ The project will start with an initial load of data using a g.V().range(0,5). Us
 
 ### Actions
 * &lt; Gets incoming edges and the source vertices
-* - Gets both incoming and outgoing edges and the other vertices
+* &mdash; Gets both incoming and outgoing edges and the other vertices
 * &gt; Gets outgoing edges and the destination vertices
-* + Creates new table and initializes it with ID query of vertices
+* &plus; Creates new table and initializes it with ID query of vertices
