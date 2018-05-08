@@ -159,7 +159,11 @@ angular.module('tableGraphExplorerApp').controller('NestedRowDisplayCtrl', ['$sc
         $scope.processTraversalData = function (vertex, data) {
             var vertices = $scope.traversalRelatedData.vertices;
             var edges = $scope.traversalRelatedData.edges;
+            $log.log("processTraversalData data arg",data);
             for (var i = 0; i < data.length; i++) {
+                if(!data[i]){
+                    continue;
+                }
                 Array.prototype.push.apply(vertices, data[i].vertices);
                 Array.prototype.push.apply(edges, data[i].edges);
             }

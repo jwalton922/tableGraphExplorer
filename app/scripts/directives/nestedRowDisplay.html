@@ -40,7 +40,7 @@
                 <button title="Traverse In Edges" data-ng-click="traverseInEdges(vertex)" class="btn btn-xs btn-primary"><</button>
                 <button title="Traverse Both Edges" data-ng-click="traverseBothEdges(vertex)" class="btn btn-xs btn-primary">-</button>
                 <button title="Traverse Out Edges" data-ng-click="traverseOutEdges(vertex)" class="btn btn-xs btn-primary">></button>
-                <button title="Start New Table" data-ng-click="newTable()" class="btn btn-xs btn-primary">+</button>
+                <button title="Start New Table" data-ng-click="newTable(vertex)" class="btn btn-xs btn-primary">+</button>
             </span>
         </td>
         <td><nested-row-display data-ng-if="vertex.relatedData" data-relateddata="vertex.relatedData" data-parentvertex="{{vertex.id}}" data-showvertexproperties="showvertexproperties" data-showedgeproperties="showedgeproperties"></nested-row-display></td>
