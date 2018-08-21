@@ -13,6 +13,7 @@ angular.module('tableGraphExplorerApp')
 
                 $scope.queries.push({});
                 $scope.server = ConfigService.getConfig().endpoint;
+                
                 $scope.$watch('server', function (newValue, prevValue) {
                     ConfigService.setEndpoint(newValue);
                 });

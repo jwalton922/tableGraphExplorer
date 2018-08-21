@@ -16,7 +16,7 @@ angular.module('tableGraphExplorerApp').directive('nestedRowDisplay', [function 
     }
 ]);
 
-angular.module('tableGraphExplorerApp').controller('NestedRowDisplayCtrl', ['$scope', '$log', 'QueryService', 'IdService', '$timeout', '$rootScope', function ($scope, $log, QueryService, IdService, $timeout, $rootScope) {
+angular.module('tableGraphExplorerApp').controller('NestedRowDisplayCtrl', ['$scope', '$log', 'QueryService', 'IdService', '$timeout', '$rootScope', 'GremlinQueryParser',function ($scope, $log, QueryService, IdService, $timeout, $rootScope,GremlinQueryParser) {
         $log.log("Nested Row Display Ctrl");
         $log.log("Related data", $scope.relateddata);
         $log.log("showvertexproperties", $scope.showvertexproperties);
@@ -27,10 +27,10 @@ angular.module('tableGraphExplorerApp').controller('NestedRowDisplayCtrl', ['$sc
 
         $scope.newTable = function (vertex) {
             var vertices = [];
-            if(vertex){
+            if (vertex) {
                 vertices.push(vertex);
             } else {
-                for(var i = 0; i < $scope.vertices.length; i++){
+                for (var i = 0; i < $scope.vertices.length; i++) {
                     vertices.push($scope.vertices[i]);
                 }
             }
@@ -79,7 +79,58 @@ angular.module('tableGraphExplorerApp').controller('NestedRowDisplayCtrl', ['$sc
                 $scope.processRelatedData();
             }
         });
-        $scope.getInEdges = function (vertex, offset, limit) {
+
+        $scope.processWebSocketData = function (data) {            
+            $log.log("Websocket query data", data);
+//            var parsedQuery = GremlinQueryParser.parseQuery(data);
+//            $log.log("Parsed Query",parsedQuery);
+            var list = data["@value"];
+            var mapList = list[0];
+            var dataInOldFormat = {vertices: [], edges: []};
+            if (!mapList["@value"]) {
+                return dataInOldFormat;
+            }
+            var map = mapList["@value"];
+            for (var i = 0; i < map.length; i++) {
+                var obj = map[i];
+                $log.log("Index " + i + " map: ", obj);
+                if (obj["@type"] && obj["@type"] === "g:Edge") {
+                    var edges = obj["@value"];
+                    $log.log("Found edges", edges);
+                    if (Array.isArray(edges)) {
+                        for (var j = 0; j < edges.length; j++) {
+                            var edge = edges[j];
+                            GremlinQueryParser.parseVertexProperties(edge);
+                            $log.log("Edge after parsing",edge);
+                            dataInOldFormat.edges.push(edges);
+                        }
+                    } else {
+                        GremlinQueryParser.parseVertexProperties(edges);
+                            $log.log("Edge after parsing",edges);
+                        dataInOldFormat.edges.push(edges);
+                    }
+                } else if (obj["@type"] && obj["@type"] === "g:Vertex") {
+
+                    var vertices = obj["@value"];
+                    if (Array.isArray(vertices)) {
+                        $log.log("Found vertices", vertices);
+                        for (var j = 0; j < vertices.length; j++) {
+                            var vertex = vertices[j];
+                            GremlinQueryParser.parseVertexProperties(vertex);
+                            $log.log("Vertex after parsing",vertex);
+                            dataInOldFormat.vertices.push(vertex);
+                        }
+                    } else {
+                        GremlinQueryParser.parseVertexProperties(vertices);
+                        $log.log("Vertex after parsing",vertices);
+                        dataInOldFormat.vertices.push(vertices);
+                    }
+                }
+            }
+            return dataInOldFormat;
+        };
+
+        $scope.getInEdges = function (vertex, offset, limit, callback) {
             if (!offset && offset !== 0) {
                 offset = 0;
             }
@@ -87,9 +138,9 @@ angular.module('tableGraphExplorerApp').controller('NestedRowDisplayCtrl', ['$sc
                 limit = 5;
             }
             var inNeighborsQuery = "g.V('" + vertex.id + "').inE().limit(" + limit + ").as('edges').outV().as('vertices').select('edges','vertices')";
-            return  QueryService.query(inNeighborsQuery);
+            QueryService.query(inNeighborsQuery, callback);
         };
-        $scope.getOutEdges = function (vertex, offset, limit) {
+        $scope.getOutEdges = function (vertex, offset, limit, callback) {
             if (!offset && offset !== 0) {
                 offset = 0;
             }
@@ -97,14 +148,15 @@ angular.module('tableGraphExplorerApp').controller('NestedRowDisplayCtrl', ['$sc
                 limit = 5;
             }
             var outNeighborsQuery = "g.V('" + vertex.id + "').outE().limit(" + limit + ").as('edges').inV().as('vertices').select('edges','vertices')";
-            return QueryService.query(outNeighborsQuery);
+            return QueryService.query(outNeighborsQuery, callback);
         };
 
         $scope.traverseOutEdges = function (vertex) {
             $scope.traversalRelatedData = {vertices: [], edges: []};
             if (vertex) {
-                $scope.getOutEdges(vertex, $scope.start, $scope.end).then(function (inData) {
-                    $scope.processTraversalData(vertex, [inData]);
+                $scope.getOutEdges(vertex, $scope.start, $scope.end, function (wsOutData) {
+                    var outData = $scope.processWebSocketData(wsOutData);
+                    $scope.processTraversalData(vertex, [outData]);
                 });
             } else {
                 for (var i = 0; i < $scope.vertices.length; i++) {
@@ -118,9 +170,10 @@ angular.module('tableGraphExplorerApp').controller('NestedRowDisplayCtrl', ['$sc
         };
 
         $scope.traverseInEdges = function (vertex) {
-             $scope.traversalRelatedData = {vertices: [], edges: []};
+            $scope.traversalRelatedData = {vertices: [], edges: []};
             if (vertex) {
-                $scope.getInEdges(vertex, $scope.start, $scope.end).then(function (inData) {
+                $scope.getInEdges(vertex, $scope.start, $scope.end, function (wsInData) {
+                    var inData = $scope.processWebSocketData(wsInData);
                     $scope.processTraversalData(vertex, [inData]);
                 });
             } else {
@@ -134,13 +187,15 @@ angular.module('tableGraphExplorerApp').controller('NestedRowDisplayCtrl', ['$sc
             }
         };
         $scope.traverseBothEdges = function (vertex) {
-             $scope.traversalRelatedData = {vertices: [], edges: []};
+            $scope.traversalRelatedData = {vertices: [], edges: []};
             $log.log("Getting neighbors for vertex", vertex);
             if (vertex) {
-                $scope.getInEdges(vertex).then(function (inData) {
-                    $log.log("In edge data", inData);
-                    $scope.getOutEdges(vertex).then(function (outData) {
-                        $log.log("Out edge data", outData);
+                $scope.getInEdges(vertex, null, null, function (wsInData) {
+                    $log.log("In edge data", wsInData);
+                    $scope.getOutEdges(vertex, null, null, function (wsOutData) {
+                        $log.log("Out edge data", wsOutData);
+                        var inData = $scope.processWebSocketData(wsInData);
+                        var outData = $scope.processWebSocketData(wsOutData);
                         $scope.processTraversalData(vertex, [inData, outData]);
                     });
                 });
@@ -159,15 +214,16 @@ angular.module('tableGraphExplorerApp').controller('NestedRowDisplayCtrl', ['$sc
         $scope.processTraversalData = function (vertex, data) {
             var vertices = $scope.traversalRelatedData.vertices;
             var edges = $scope.traversalRelatedData.edges;
-            $log.log("processTraversalData data arg",data);
+            $log.log("processTraversalData data arg", data);
             for (var i = 0; i < data.length; i++) {
-                if(!data[i]){
+                if (!data[i]) {
                     continue;
                 }
                 Array.prototype.push.apply(vertices, data[i].vertices);
                 Array.prototype.push.apply(edges, data[i].edges);
             }
             vertex.relatedData = {vertices: vertices, edges: edges};
+            $scope.$apply();
         };
 //        for(var key in $scope){
 //            $log.log("Scope key: "+key);

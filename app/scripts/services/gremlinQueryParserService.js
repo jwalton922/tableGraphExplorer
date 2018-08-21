@@ -1,6 +1,27 @@
 'use strict';
 angular.module('tableGraphExplorerApp').factory('GremlinQueryParser', ['$log', '$http', function ($log, $http) {
-
+        function parseVertexProperties(vertex){
+            var properties = {};
+            for(var property in vertex.properties){
+                var value = vertex.properties[property];
+                $log.log("Original Vertex Property Value: ",value);
+                if(Array.isArray(value)){
+                    $log.log("Value is array");
+                    var valueList = [];
+                    for(var i = 0; i < value.length; i++){
+                        $log.log("Element ",value[i]);
+                        var element = value[i]["@value"].value;
+                        $log.log("Element value",element);
+                        valueList.push(element);
+                    }
+                    properties[property] = valueList;
+                } else {
+                    properties[property] = value["@value"].value;
+                }
+            }
+            vertex.properties = properties;
+        }
+        
         function parseProperties(inputProperties) {
             $log.log("Parse properties",inputProperties);
             var properties = {};
@@ -113,6 +134,7 @@ angular.module('tableGraphExplorerApp').factory('GremlinQueryParser', ['$log', '
             return returnData;
         }
         return {
-            parseQuery: parseQuery
+            parseQuery: parseQuery,
+            parseVertexProperties: parseVertexProperties
         };
     }]);

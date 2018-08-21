@@ -13,21 +13,21 @@ angular.module('tableGraphExplorerApp').directive('graphQuery', [function ($log)
     }
 ]);
 
-angular.module('tableGraphExplorerApp').controller('GraphQueryCtrl', ['$scope', '$log', 'QueryService', 'IdService', function ($scope, $log, QueryService, IdService) {
-        $log.log("GraphQueryCtrl Query from directive",$scope.inputQuery);
+angular.module('tableGraphExplorerApp').controller('GraphQueryCtrl', ['$scope', '$log', 'QueryService', 'IdService', 'GremlinQueryParser',function ($scope, $log, QueryService, IdService,GremlinQueryParser) {
+        $log.log("GraphQueryCtrl Query from directive", $scope.inputQuery);
         $scope.vertices = [];
         $scope.showFilter = false;
         $scope.filters = [];
-        if($scope.inputQuery.vertices){
+        if ($scope.inputQuery.vertices) {
             var query = "g.V()";
             $log.log("Adding id queries to query");
-            for(var i = 0; i < $scope.inputQuery.vertices.length; i++){
+            for (var i = 0; i < $scope.inputQuery.vertices.length; i++) {
                 var vertex = $scope.inputQuery.vertices[i];
                 $scope.filters.push({filterType: "id", id: vertex.id});
             }
         }
-        
-        $scope.filterTypes = ["id", "label","property"];
+
+        $scope.filterTypes = ["id", "label", "property"];
         $scope.config = {
             simpleIds: true,
             showVertexProperties: true,
@@ -37,9 +37,9 @@ angular.module('tableGraphExplorerApp').controller('GraphQueryCtrl', ['$scope', 
         $scope.limit = 5;
         $scope.query = "g.V()";
         $scope.data = {};
-        
-        $scope.addFilter = function(){
-          $scope.filters.push({filterType: "property"});
+
+        $scope.addFilter = function () {
+            $scope.filters.push({filterType: "property"});
         };
         $scope.addRangeToQuery = function (query) {
             return query + ".range(" + $scope.offset + "," + $scope.limit + ")";
@@ -50,31 +50,31 @@ angular.module('tableGraphExplorerApp').controller('GraphQueryCtrl', ['$scope', 
             var label = null;
             var ids = [];
             var props = [];
-            for(var i = 0; i < $scope.filters.length; i++){
+            for (var i = 0; i < $scope.filters.length; i++) {
                 var filter = $scope.filters[i];
-                if(filter.filterType === "id"){
-                    ids.push("'"+filter.id+"'");
-                } else if(filter.filterType === "label") {
-                    label = "'"+filter.label+"'";
+                if (filter.filterType === "id") {
+                    ids.push("'" + filter.id + "'");
+                } else if (filter.filterType === "label") {
+                    label = "'" + filter.label + "'";
                 } else {
-                    var propQuery = "has('"+filter.property+"','"+filter.value+"')";
+                    var propQuery = "has('" + filter.property + "','" + filter.value + "')";
                     props.push(propQuery);
                 }
             }
             var query = null;
-            
-            if(ids.length > 0){
-                query = "g.V(["+ids.join()+"])";
+
+            if (ids.length > 0) {
+                query = "g.V([" + ids.join() + "])";
             } else {
                 query = "g.V()";
             }
-            if(label){
-                query+=".hasLabel("+label+")";
+            if (label) {
+                query += ".hasLabel(" + label + ")";
             }
-            if(props.length > 0){
-                query+="."+props.join(".");
+            if (props.length > 0) {
+                query += "." + props.join(".");
             }
-            $log.log("Query before range: ",query);
+            $log.log("Query before range: ", query);
             $scope.query = query;
             return $scope.addRangeToQuery($scope.query);
         };
@@ -94,16 +94,32 @@ angular.module('tableGraphExplorerApp').controller('GraphQueryCtrl', ['$scope', 
             $scope.queryVertices();
         };
         $scope.queryVertices = function () {
-            
+
             var query = $scope.getQuery();
             $log.log("Query ", query);
-            var queryResp = QueryService.query(query);
-            $log.log("Query resp", queryResp);
-            queryResp.then(function (data) {
+            QueryService.query(query, function (data) {
                 $log.log("query results", data);
-                $scope.vertices = $scope.processQueryResults(null, data);
+                var list = data["@value"];
+                var dataInOldFormat = {vertices: []};
+                for(var i = 0; i < list.length; i++){
+                    var vertex = list[i]["@value"];
+                    GremlinQueryParser.parseVertexProperties(vertex);
+                    dataInOldFormat.vertices.push(vertex);
+                }
+                $scope.vertices = $scope.processQueryResults(null, dataInOldFormat);
+                $log.log("$scope.vertiex",$scope.vertices);
                 $scope.data.relatedData = {vertices: $scope.vertices, edges: []};
+                //this is now due to WS so need to manually apply
+                $scope.$apply();
             });
+
+//            var queryResp = QueryService.query(query);
+//            $log.log("Query resp", queryResp);
+//            queryResp.then(function (data) {
+//                $log.log("query results", data);
+//                $scope.vertices = $scope.processQueryResults(null, data);
+//                $scope.data.relatedData = {vertices: $scope.vertices, edges: []};
+//            });
         };
 
         $scope.processQueryResults = function (vertex, data) {
@@ -113,6 +129,7 @@ angular.module('tableGraphExplorerApp').controller('GraphQueryCtrl', ['$scope', 
                     data.vertices[i]._id = IdService.getSimpleId(id);
                 }
             }
+            $log.log("Vertices",data.vertices);
             return data.vertices;
         };
 
