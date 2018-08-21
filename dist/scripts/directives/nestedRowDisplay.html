@@ -1,0 +1,48 @@
+<table class="table table-bordered">
+    <tr>
+        <th ng-show="showEdgeColumns">Direction</th>
+        <th ng-show="showEdgeColumns">E Label<br/><span><input type="checkbox" data-ng-model="showedgeproperties"/>Show Props</span></th>
+        <th>V Label</th>
+        <th>Vertex <br/><span><input type="checkbox" data-ng-model="showvertexproperties"/>Show Props</span></th>
+        <th>Actions <br/>
+         <span>
+                <button title="Traverse In Edges" data-ng-click="traverseInEdges()" class="btn btn-xs btn-primary"><</button>
+                <button title="Traverse Both Edges" data-ng-click="traverseBothEdges()" class="btn btn-xs btn-primary">-</button>
+                <button title="Traverse Out Edges" data-ng-click="traverseOutEdges()" class="btn btn-xs btn-primary">></button>
+                <button title="Start New Table" data-ng-click="newTable()" class="btn btn-xs btn-primary">+</button>
+            </span>            
+        </th>
+        <th>Related</th>
+    </tr>
+    <tr ng-repeat="vertex in vertices">        
+        <td ng-show="showEdgeColumns">{{vertex.edge.direction}}</td>
+        <td ng-show="showEdgeColumns">
+            {{vertex.edge.label}}
+            <table data-ng-if="showedgeproperties || vertex.edge.showedgeproperties" class="table table-bordered">
+                <tr><th>Prop</th><th>Value</th></tr>
+                <tr data-ng-repeat="(prop,value) in vertex.edge.properties">
+                    <td>{{prop}}</td><td>{{value}}</td>
+                </tr>
+            </table>
+        </td>
+        <td>{{vertex.label}}</td>
+        <td>
+            <b>{{vertex.id}}</b>
+            <table data-ng-if="showvertexproperties || vertex.showVertexProperties" class="table table-bordered">
+                <tr data-ng-repeat="(prop,value) in vertex.properties">
+                    <td>{{prop}}</td><td>{{value}}</td>
+                </tr>
+            </table>
+        </td>
+
+        <td>
+            <span>
+                <button title="Traverse In Edges" data-ng-click="traverseInEdges(vertex)" class="btn btn-xs btn-primary"><</button>
+                <button title="Traverse Both Edges" data-ng-click="traverseBothEdges(vertex)" class="btn btn-xs btn-primary">-</button>
+                <button title="Traverse Out Edges" data-ng-click="traverseOutEdges(vertex)" class="btn btn-xs btn-primary">></button>
+                <button title="Start New Table" data-ng-click="newTable(vertex)" class="btn btn-xs btn-primary">+</button>
+            </span>
+        </td>
+        <td><nested-row-display data-ng-if="vertex.relatedData" data-relateddata="vertex.relatedData" data-parentvertex="{{vertex.id}}" data-showvertexproperties="showvertexproperties" data-showedgeproperties="showedgeproperties"></nested-row-display></td>
+</tr>
+</table>

@@ -3,11 +3,18 @@ This project is for displaying in a [Tinkerpop](http://tinkerpop.apache.org/) co
 
 ![Image](https://user-images.githubusercontent.com/449037/37786323-03d893e8-2dc2-11e8-92ee-4a89e2f298d8.png)
 
-## Getting Started
-Inside the project diretory run
+## Simple startup
+Inside the project
+* cd dist/
+* python -m SimpleHTTPServer 8000
+
+## Getting Started Working on the project
+Inside the project directory run
 
 * npm install
 * bower install
+
+
 
 ## Serving the project locally
 * grunt serve

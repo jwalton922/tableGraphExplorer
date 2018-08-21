@@ -1,0 +1,23 @@
+<div id="mainQueryContainer" class="row">
+    <div data-ng-repeat="query in queries">
+        <div data-graph-query input-query="query"></div>
+    </div>
+    <!--    <div>
+            <h4>Query</h4>
+            <div class="col-md-12">
+                <div class="col-md-4">
+                    Offset: <input data-ng-model="offset" type="text" class="form-control input-sm"/>
+                </div>
+                <div class="col-md-4">
+                    Limit <input data-ng-model="limit" type="text" class="form-control input-sm"/>
+                </div>
+            </div>
+            <textarea data-ng-model="query" rows="3" cols="90"></textarea>
+            <div><button class="btn btn-danger" data-ng-click="queryVertices()">Query</button></div>
+        </div>
+        <nested-row-display data-ng-if="data.relatedData" data-relateddata="data.relatedData" data-showvertexproperties="config.showVertexProperties" data-showedgeproperties="config.showEdgeProperties" data-parentvertex="{{vertex.id}}"></nested-row-display>
+        <div>
+            <span><button data-ng-click="getPreviousPage()" data-ng-show="offset > 0" >Previous</button></span>
+            <span><button data-ng-click="getNextPage()">Next</button></span>
+        </div>-->
+</div>

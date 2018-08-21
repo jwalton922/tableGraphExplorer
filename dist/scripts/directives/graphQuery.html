@@ -1,0 +1,41 @@
+<div class="row">
+    <div>
+
+        <h4>Filter
+            <span>
+                <button data-ng-show="showFilter" class="btn btn-xs btn-primary" data-ng-click="showFilter = false;">Hide</button>
+                <button data-ng-show="!showFilter"class="btn btn-xs btn-primary" data-ng-click="showFilter = true;">Show</button></span></h4>
+        <div data-ng-show="showFilter">
+            <div data-ng-repeat="filter in filters">
+                <select data-ng-options="filterType for filterType in filterTypes" data-ng-model="filter.filterType"></select>
+                <span data-ng-show="filter.filterType === 'property'">
+                    <label>Property</label><input type="text" data-ng-model="filter.property" />
+                    <label>Value</label><input type="text" data-ng-model="filter.value" />
+                </span>
+                <span data-ng-show="filter.filterType === 'id'"><label>ID</label><input type="text" data-ng-model="filter.id" /></span>
+                <span data-ng-show="filter.filterType === 'label'"><label>Label</label><input type="text" data-ng-model="filter.label" /></span>
+                <button class="btn btn-danger btn-sm" data-ng-click="filters.splice($index, 1)">-</button>
+            </div>
+            <button class="btn btn-success btn-sm" data-ng-click="addFilter()">+</button>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                Offset <input data-ng-model="offset" type="text" class="form-control input-sm"/>
+            </div>
+            <div class="col-md-4">
+                Limit: <input data-ng-model="limit" type="text" class="form-control input-sm"/>
+            </div>
+        </div>
+        <!--        <textarea data-ng-model="query" rows="3" cols="90"></textarea>-->
+        <div class="row" style="margin-top:10px; margin-bottom:10px;">
+            <div class="col-md-12">
+                <button class="btn btn-danger btn-sm" data-ng-click="queryVertices()">Query</button>
+            </div>
+        </div>
+    </div>
+    <nested-row-display data-ng-if="data.relatedData" data-relateddata="data.relatedData" data-showvertexproperties="config.showVertexProperties" data-showedgeproperties="config.showEdgeProperties" data-parentvertex="{{vertex.id}}"></nested-row-display>
+    <div>
+        <span><button data-ng-click="getPreviousPage()" data-ng-show="offset > 0" >Previous</button></span>
+        <span><button data-ng-click="getNextPage()">Next</button></span>
+    </div>
+</div>

@@ -392,7 +392,38 @@ module.exports = function (grunt) {
           cwd: 'bower_components/bootstrap/dist',
           src: 'fonts/*',
           dest: '<%= yeoman.dist %>'
-        }]
+        },
+        {
+          expand: true,
+          cwd: '<%= yeoman.app %>/scripts/services',
+          src: '*',
+          dest: '<%= yeoman.dist %>/scripts/services/'
+        },
+        {
+          expand: true,
+          cwd: '<%= yeoman.app %>/scripts/controllers',
+          src: '*',
+          dest: '<%= yeoman.dist %>/scripts/controllers/'
+        },
+        {
+          expand: true,
+          cwd: '<%= yeoman.app %>/scripts/directives',
+          src: '*',
+          dest: '<%= yeoman.dist %>/scripts/directives/'
+        },
+        {
+          expand: true,
+          cwd: '<%= yeoman.app %>/scripts/',
+          src: '*',
+          dest: '<%= yeoman.dist %>/scripts/'
+        },
+        {
+          expand: true,
+          cwd: '<%= yeoman.app %>/views',
+          src: '*',
+          dest: '<%= yeoman.dist %>/views/'
+        }
+    ]
       },
       styles: {
         expand: true,
@@ -467,7 +498,7 @@ module.exports = function (grunt) {
     'ngAnnotate',
     'copy:dist',
     'cdnify',
-    'cssmin',
+    'cssmin',  
     'uglify',
     'filerev',
     'usemin',
